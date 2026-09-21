@@ -1,0 +1,3 @@
+# LINKK proposal constraints
+
+This directory contains confidential CRAVE proposal work. Keep local until an authenticated private deployment is ready. Never deploy it to the existing public ProductViu site. All assets must be protected, not only the entry page. Search-engine exclusion is supplementary to authentication. Do not publish social posts, send client messages or share files externally without user authorization for that action. Ground product geometry, names and ratings in client-approved documentation; label unverified prototype details as conceptual. Preserve sources and uncertainty in research notes.

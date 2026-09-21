@@ -1,0 +1,1 @@
+{"name":"linkk-productviu-prototype","private":true,"type":"module","scripts":{"dev":"vite --host 127.0.0.1 --port 4180","build":"vite build"},"dependencies":{"three":"^0.185.1","vite":"8.0.13"}}

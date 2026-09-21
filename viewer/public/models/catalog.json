@@ -1,0 +1,572 @@
+[
+  {
+    "slug": "feeder",
+    "name": "Feeder",
+    "photo": "144637",
+    "facts": [
+      "Recessed I section; five spread plated contacts",
+      "1000 mm overall study length \u00b7 150 mm flange width",
+      "Catalogue: 3000 mm standard; 500 mm minimum"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "feeder.glb",
+        "blend": "feeder.blend",
+        "photo": "144637.jpg",
+        "render": "feeder.png"
+      },
+      {
+        "key": "standard",
+        "label": "3000 mm standard length",
+        "file": "feeder-standard.glb",
+        "blend": "feeder-standard.blend",
+        "photo": "144637.jpg",
+        "render": "feeder-standard.png"
+      },
+      {
+        "key": "double-pack",
+        "label": "Double pack section",
+        "file": "feeder-double-pack.glb",
+        "blend": "feeder-double-pack.blend",
+        "photo": "144709.jpg",
+        "render": "feeder-double-pack.png"
+      },
+      {
+        "key": "triple-pack",
+        "label": "Triple pack section",
+        "file": "feeder-triple-pack.glb",
+        "blend": "feeder-triple-pack.blend",
+        "photo": "144709.jpg",
+        "render": "feeder-triple-pack.png"
+      }
+    ]
+  },
+  {
+    "slug": "plug-in-feeder",
+    "name": "Plug-In Busduct",
+    "photo": "144637",
+    "facts": [
+      "600 mm opening pitch on 1500 mm study sample",
+      "Catalogue: 3000 mm standard; 900 mm minimum",
+      "Maximum 4 front / 8 front and back openings"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "plug-in-feeder.glb",
+        "blend": "plug-in-feeder.blend",
+        "photo": "144637.jpg",
+        "render": "plug-in-feeder.png"
+      }
+    ]
+  },
+  {
+    "slug": "edgewise-elbow",
+    "name": "Edgewise Elbow",
+    "photo": "145020",
+    "facts": [
+      "Horizontal L profile",
+      "Continuous mitred folded flanges",
+      "310 mm dimension shown in reference"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "edgewise-elbow.glb",
+        "blend": "edgewise-elbow.blend",
+        "photo": "145020.jpg",
+        "render": "edgewise-elbow.png"
+      }
+    ]
+  },
+  {
+    "slug": "edgewise-offset",
+    "name": "Edgewise Offset",
+    "photo": "145053",
+    "facts": [
+      "Horizontal Z profile",
+      "Three 310 mm dimensions shown in reference"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "edgewise-offset.glb",
+        "blend": "edgewise-offset.blend",
+        "photo": "145053.jpg",
+        "render": "edgewise-offset.png"
+      }
+    ]
+  },
+  {
+    "slug": "edgewise-tee",
+    "name": "Edgewise Tee",
+    "photo": "145024",
+    "facts": [
+      "Horizontal T branch",
+      "Raised central junction cover",
+      "Three open terminal stacks"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "edgewise-tee.glb",
+        "blend": "edgewise-tee.blend",
+        "photo": "145024.jpg",
+        "render": "edgewise-tee.png"
+      }
+    ]
+  },
+  {
+    "slug": "flatwise-elbow",
+    "name": "Flatwise Elbow",
+    "photo": "144835",
+    "facts": [
+      "Vertical L profile",
+      "Continuous recessed L-shaped side sheets"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "flatwise-elbow.glb",
+        "blend": "flatwise-elbow.blend",
+        "photo": "144835.jpg",
+        "render": "flatwise-elbow.png"
+      }
+    ]
+  },
+  {
+    "slug": "flatwise-offset",
+    "name": "Flatwise Offset",
+    "photo": "144845",
+    "facts": [
+      "Vertical Z profile",
+      "Two continuous flatwise direction changes"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "flatwise-offset.glb",
+        "blend": "flatwise-offset.blend",
+        "photo": "144845.jpg",
+        "render": "flatwise-offset.png"
+      }
+    ]
+  },
+  {
+    "slug": "flatwise-tee",
+    "name": "Flatwise Tee",
+    "photo": "144849",
+    "facts": [
+      "Vertical T branch",
+      "Continuous T-shaped side profile"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "flatwise-tee.glb",
+        "blend": "flatwise-tee.blend",
+        "photo": "144849.jpg",
+        "render": "flatwise-tee.png"
+      }
+    ]
+  },
+  {
+    "slug": "flange-end",
+    "name": "Flange End",
+    "photo": "144740",
+    "facts": [
+      "Equipment mounting flange",
+      "Spread lugs with through-holes"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "flange-end.glb",
+        "blend": "flange-end.blend",
+        "photo": "144740.jpg",
+        "render": "flange-end.png"
+      }
+    ]
+  },
+  {
+    "slug": "end-feed-box",
+    "name": "End Feed Cable Box",
+    "photo": "144825",
+    "facts": [
+      "Hollow termination enclosure",
+      "Flanged neck; removable bolted panels"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "end-feed-box.glb",
+        "blend": "end-feed-box.blend",
+        "photo": "144825.jpg",
+        "render": "end-feed-box.png"
+      }
+    ]
+  },
+  {
+    "slug": "end-cover",
+    "name": "End Cover",
+    "photo": "144940",
+    "facts": [
+      "Folded cap with separate insert",
+      "156 \u00d7 175 mm cover plan; variable height"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "end-cover.glb",
+        "blend": "end-cover.blend",
+        "photo": "144940.jpg",
+        "render": "end-cover.png"
+      }
+    ]
+  },
+  {
+    "slug": "combination-elbow",
+    "name": "Combination Elbow",
+    "photo": "144930",
+    "facts": [
+      "Combined horizontal and vertical route",
+      "Internal compound transition is schematic"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "combination-elbow.glb",
+        "blend": "combination-elbow.blend",
+        "photo": "144930.jpg",
+        "render": "combination-elbow.png"
+      }
+    ]
+  },
+  {
+    "slug": "reducer",
+    "name": "Reducer",
+    "photo": "145120",
+    "facts": [
+      "Different end heights; sloping transition",
+      "800 mm overall study length"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "reducer.glb",
+        "blend": "reducer.blend",
+        "photo": "145120.jpg",
+        "render": "reducer.png"
+      }
+    ]
+  },
+  {
+    "slug": "transposition",
+    "name": "Phase Transposition Unit",
+    "photo": "145038",
+    "facts": [
+      "1100 mm overall study length",
+      "Wide central chamber; hidden crossings omitted"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "transposition.glb",
+        "blend": "transposition.blend",
+        "photo": "145038.jpg",
+        "render": "transposition.png"
+      }
+    ]
+  },
+  {
+    "slug": "expansion",
+    "name": "Expansion Unit",
+    "photo": "145132",
+    "facts": [
+      "Two bolted hoods and corrugated centre",
+      "Catalogue: 1200 (+25 mm)",
+      "Hidden flexible links omitted"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "expansion.glb",
+        "blend": "expansion.blend",
+        "photo": "145132.jpg",
+        "render": "expansion.png"
+      }
+    ]
+  },
+  {
+    "slug": "tap-off",
+    "name": "Tap-Off Unit",
+    "photo": "144450",
+    "facts": [
+      "External handle; hollow body and overhanging lid",
+      "Plug-in fingers, earth clips and clamps",
+      "Double handle specified above 300 A"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "tap-off.glb",
+        "blend": "tap-off.blend",
+        "photo": "144450.jpg",
+        "render": "tap-off.png"
+      },
+      {
+        "key": "double-bottom",
+        "label": "Double handle \u00b7 bottom entry",
+        "file": "tap-off-double-bottom.glb",
+        "blend": "tap-off-double-bottom.blend",
+        "photo": "144450.jpg",
+        "render": "tap-off-double-bottom.png"
+      },
+      {
+        "key": "single-top",
+        "label": "Single handle \u00b7 top entry",
+        "file": "tap-off-single-top.glb",
+        "blend": "tap-off-single-top.blend",
+        "photo": "144457.jpg",
+        "render": "tap-off-single-top.png"
+      },
+      {
+        "key": "double-top",
+        "label": "Double handle \u00b7 top entry",
+        "file": "tap-off-double-top.glb",
+        "blend": "tap-off-double-top.blend",
+        "photo": "144457.jpg",
+        "render": "tap-off-double-top.png"
+      },
+      {
+        "key": "rotary-bottom",
+        "label": "Rotary \u00b7 bottom entry",
+        "file": "tap-off-rotary-bottom.glb",
+        "blend": "tap-off-rotary-bottom.blend",
+        "photo": "144515.jpg",
+        "render": "tap-off-rotary-bottom.png"
+      },
+      {
+        "key": "rotary-top",
+        "label": "Rotary \u00b7 top entry",
+        "file": "tap-off-rotary-top.glb",
+        "blend": "tap-off-rotary-top.blend",
+        "photo": "144518.jpg",
+        "render": "tap-off-rotary-top.png"
+      },
+      {
+        "key": "outlet-bottom",
+        "label": "Outlet \u00b7 bottom entry",
+        "file": "tap-off-outlet-bottom.glb",
+        "blend": "tap-off-outlet-bottom.blend",
+        "photo": "144522.jpg",
+        "render": "tap-off-outlet-bottom.png"
+      },
+      {
+        "key": "outlet-top",
+        "label": "Outlet \u00b7 top entry",
+        "file": "tap-off-outlet-top.glb",
+        "blend": "tap-off-outlet-top.blend",
+        "photo": "144525.jpg",
+        "render": "tap-off-outlet-top.png"
+      },
+      {
+        "key": "installed",
+        "label": "Installed on vertical plug-in busduct",
+        "file": "tap-off-installed.glb",
+        "blend": "tap-off-installed.blend",
+        "photo": "145253.jpg",
+        "render": "tap-off-installed.png"
+      }
+    ]
+  },
+  {
+    "slug": "horizontal-support",
+    "name": "Horizontal Support",
+    "photo": "145306",
+    "facts": [
+      "M10 rods; L-channel and flange clips",
+      "1500 mm support spacing"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "horizontal-support.glb",
+        "blend": "horizontal-support.blend",
+        "photo": "145306.jpg",
+        "render": "horizontal-support.png"
+      }
+    ]
+  },
+  {
+    "slug": "fixed-support",
+    "name": "Vertical Fixed Support",
+    "photo": "145321",
+    "facts": [
+      "Riser restraint and fixed bearing plates",
+      "C-channels supplied by others"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "fixed-support.glb",
+        "blend": "fixed-support.blend",
+        "photo": "145321.jpg",
+        "render": "fixed-support.png"
+      },
+      {
+        "key": "wall",
+        "label": "Wall-mounted",
+        "file": "fixed-support-wall.glb",
+        "blend": "fixed-support-wall.blend",
+        "photo": "145321.jpg",
+        "render": "fixed-support-wall.png"
+      }
+    ]
+  },
+  {
+    "slug": "spring-support",
+    "name": "Vertical Spring Hanger",
+    "photo": "145432",
+    "facts": [
+      "Four helical compression springs",
+      "Guide rods, washers and bearing plates"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "spring-support.glb",
+        "blend": "spring-support.blend",
+        "photo": "145432.jpg",
+        "render": "spring-support.png"
+      },
+      {
+        "key": "wall",
+        "label": "Wall-mounted",
+        "file": "spring-support-wall.glb",
+        "blend": "spring-support-wall.blend",
+        "photo": "145500.jpg",
+        "render": "spring-support-wall.png"
+      }
+    ]
+  },
+  {
+    "slug": "joint",
+    "name": "Joint Assembly",
+    "photo": "144436",
+    "facts": [
+      "Two insulated bolt axes",
+      "Nine named component types from the drawing",
+      "Blue phase and end insulators"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "joint.glb",
+        "blend": "joint.blend",
+        "photo": "144436.jpg",
+        "render": "joint.png"
+      }
+    ]
+  },
+  {
+    "slug": "wall-flange",
+    "name": "Wall Flange",
+    "photo": "145002",
+    "facts": [
+      "Two halves; I-shaped cut-out",
+      "300 mm overall width; height varies by section"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "wall-flange.glb",
+        "blend": "wall-flange.blend",
+        "photo": "145002.jpg",
+        "render": "wall-flange.png"
+      }
+    ]
+  },
+  {
+    "slug": "indoor-joint",
+    "name": "Indoor Joint Covers",
+    "photo": "144538",
+    "facts": [
+      "Top, bottom and side joint covers",
+      "Gasket interfaces",
+      "IP54\u2013IP66 drawing; IP42 omits side cover"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "indoor-joint.glb",
+        "blend": "indoor-joint.blend",
+        "photo": "144538.jpg",
+        "render": "indoor-joint.png"
+      }
+    ]
+  },
+  {
+    "slug": "outdoor-cover",
+    "name": "Outdoor External Cover",
+    "photo": "144553",
+    "facts": [
+      "Additional exterior weather shell",
+      "Overlap at joint",
+      "Outdoor IP66 reference construction"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Reference assembly",
+        "file": "outdoor-cover.glb",
+        "blend": "outdoor-cover.blend",
+        "photo": "144553.jpg",
+        "render": "outdoor-cover.png"
+      }
+    ]
+  },
+  {
+    "slug": "connected-system",
+    "name": "Vertical Plug-In Connection Animation",
+    "photo": "145253",
+    "facts": [
+      "Vertical plug-in riser matched to the supplied reference",
+      "Two installed tap-off units plus one guided connection demonstration",
+      "Moving pulses show distribution direction, not literal AC electron motion"
+    ],
+    "variants": [
+      {
+        "key": "",
+        "label": "Animated plug-in application sequence",
+        "file": "connected-system.glb",
+        "blend": "connected-system.blend",
+        "photo": "145253.jpg",
+        "render": "connected-system.png"
+      }
+    ]
+  }
+]
