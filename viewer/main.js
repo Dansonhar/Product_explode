@@ -17,20 +17,26 @@ $('#app').innerHTML=`
 
 const scene=new T.Scene();scene.background=new T.Color('#e9edf0');
 const camera=new T.PerspectiveCamera(35,1,.001,100);
-const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;$('#canvas').appendChild(renderer.domElement);
+const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;$('#canvas').appendChild(renderer.domElement);
+// Pixel budget: full device ratio on a small canvas, scaled back on a large one
+// so shading cost stays roughly constant instead of growing with the window.
+const PIXEL_BUDGET=2.6e6;
+const pixelRatio=(w,h)=>Math.max(1,Math.min(devicePixelRatio,1.5,Math.sqrt(PIXEL_BUDGET/Math.max(w*h,1))));
 scene.add(new T.HemisphereLight(0xffffff,0x637181,1.8));for(const [position,power] of [[[-3,6,-4],4],[[4,2,3],2.2],[[-2,-3,2],1.3]]){const light=new T.DirectionalLight(0xffffff,power);light.position.set(...position);scene.add(light)}
 const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=.03;controls.maxDistance=30;
 controls.autoRotateSpeed=1.15;
 if(import.meta.env.DEV)window.__megaductViewState=()=>[...camera.position.toArray(),...camera.quaternion.toArray(),...controls.target.toArray(),camera.zoom];
 const EXPLODE_SCALE=1.4;
-const loader=new GLTFLoader();let model,parts=[],demoParts=[],index=0,variantIndex=0,selected=null,amount=0,target=0,ghost=false,dark=false,token=0,dirty=true,tourParts=[],tourOrder=[],tourCursor=0,tourLast=0,flowGroup=null,flowCurves=[],flowMarkers=[],flowActive=false,flowElapsed=0,flowLastFrame=0;
+const loader=new GLTFLoader();let model,parts=[],demoParts=[],index=0,variantIndex=0,selected=null,amount=0,target=0,ghost=false,dark=false,token=0,dirty=true,tourParts=[],tourOrder=[],tourCursor=0,tourLast=0,flowGroup=null,flowCurves=[],flowMarkers=[],flowActive=false,flowElapsed=0,flowLastFrame=0,canvasW=0,canvasH=0,tourLabels=[],tourGroups=[];
+const scratch=new T.Vector3();
 const FLOW_DETAIL_HOLD=6500,TOUR_DETAIL_HOLD=9000;
 const current=()=>catalog[index],variant=()=>current().variants[variantIndex];
 const cleanName=name=>name.replaceAll('_',' ').replace(/\.?\d{3}$/,'');
 function listCatalog(){
  const query=$('#search').value.toLowerCase();$('#catalog').innerHTML=catalog.map((p,i)=>p.name.toLowerCase().includes(query)?`<button class="product ${index===i?'selected':''}" data-product="${i}"><img src="/thumbs/${p.slug}.webp" loading="lazy" decoding="async" alt="" onerror="this.style.visibility='hidden'"><span><small>${String(i+1).padStart(2,'0')}</small>${p.name}</span><em>↗</em></button>`:'').join('');
- document.querySelectorAll('[data-product]').forEach(b=>b.onclick=()=>load(+b.dataset.product));
 }
+$('#catalog').onclick=e=>{const b=e.target.closest('[data-product]');if(b)load(+b.dataset.product)};
+$('#parts').onclick=e=>{const b=e.target.closest('[data-part]');if(b)select(parts[+b.dataset.part])};
 function summary(){
  $('#part-title').textContent=current().name;$('#part-desc').textContent=variant().label;
  const system=current().slug==='connected-system';
@@ -38,13 +44,20 @@ function summary(){
 }
 function listParts(){
  $('#parts').innerHTML=parts.map((p,i)=>`<button class="part ${p===selected?'selected':''}" data-part="${i}"><i class="${p.userData.kind}"></i><span>${cleanName(p.name)}<small>${p.userData.material||''}</small></span></button>`).join('');
- document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>select(parts[+b.dataset.part]));
  if(selected)$('#parts .selected')?.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 function appearance(){
- for(const p of parts)p.traverse(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material]){
-  const faded=selected&&p!==selected,transparent=ghost&&p.userData.kind==='enclosure',featured=p===selected||tourParts.includes(p);m.opacity=faded?.08:transparent?.10:1;m.transparent=m.opacity<1;m.depthWrite=!m.transparent;m.emissive?.set(featured?0x3a1711:0x000000);m.emissiveIntensity=featured?.32:1;m.needsUpdate=true;
- }});dirty=true;
+ for(const p of parts){
+  const faded=selected&&p!==selected,xray=ghost&&p.userData.kind==='enclosure',featured=p===selected||tourParts.includes(p);
+  const opacity=faded?.08:xray?.10:1,transparent=opacity<1;
+  for(const m of p.userData.materials){
+   // Only `transparent` rebuilds the shader program; opacity and emissive are
+   // uniforms. Flagging needsUpdate unconditionally recompiled every material
+   // on every selection and on every tour step.
+   if(m.transparent!==transparent){m.transparent=transparent;m.depthWrite=!transparent;m.needsUpdate=true}
+   m.opacity=opacity;m.emissive?.set(featured?0x3a1711:0x000000);m.emissiveIntensity=featured?.32:1;
+  }
+ }dirty=true;
 }
 function select(p){selected=selected===p?null:p;if(selected){$('#part-title').textContent=cleanName(p.name);$('#part-desc').textContent=p.userData.description||'';$('#material-readout').innerHTML=`<span>Component material</span><strong>${p.userData.material||'Reference finish'}</strong>`}else summary();appearance();listParts()}
 function setMaterial(){if(!model)return;model.traverse(o=>{if(o.isMesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(/^core(?:\.|$)/.test(m.name))m.color.set($('#material').value==='copper'?'#b46e43':'#bbc4cc')});dirty=true}
@@ -69,11 +82,30 @@ function setupFlow(){flowGroup=new T.Group();flowGroup.name='Animated schematic 
 function updateFlow(time){if(!flowActive)return;if(flowLastFrame)flowElapsed+=Math.min(time-flowLastFrame,100);flowLastFrame=time;const speed=flowElapsed*.00016;for(const marker of flowMarkers){const t=(speed+marker.userData.offset)%1;marker.position.copy(flowCurves[marker.userData.path].getPointAt(t));const pulse=.84+.22*Math.sin((t*10+marker.userData.path)*Math.PI);marker.scale.setScalar(pulse)}const stages=['Incoming supply energises the vertical riser','Plug-in outlets provide connection points at each level','Guide ports align the tap-off before engagement','Interlocking clamps secure the tap-off unit','Power transfers through the plug-in contacts to the local load'];$('#flow-stage').textContent=stages[Math.floor(flowElapsed/FLOW_DETAIL_HOLD)%stages.length]}
 function updateConnectionDemo(){if(!demoParts.length||amount>.01)return;const cycle=(flowElapsed%18000)/18000,ease=x=>x*x*(3-2*x);let travel=0;if(cycle>.22&&cycle<.42)travel=ease((cycle-.22)/.20);else if(cycle>=.42&&cycle<=.76)travel=1;else if(cycle>.76&&cycle<.94)travel=1-ease((cycle-.76)/.18);for(const p of demoParts)p.position.addScaledVector(p.userData.demoAttach,travel)}
 function tourSequence(){const kinds=['connection','conductor','insulation','enclosure','protection','support'],groups=Object.fromEntries(kinds.map(k=>[k,parts.filter(p=>p.userData.kind===k)])),result=[];for(let row=0;result.length<parts.length;row++){let added=false;for(const kind of kinds)if(groups[kind][row]){result.push(groups[kind][row]);added=true}if(!added)break}return result}
-function clearTourLabels(){tourParts=[];$('#tour-labels').replaceChildren();$('#tour-lines').replaceChildren();appearance()}
-function buildTourGroup(){if(!tourOrder.length)return;tourParts=tourOrder.slice(tourCursor,tourCursor+3);const labels=document.createDocumentFragment(),lines=document.createDocumentFragment();tourParts.forEach((part,i)=>{const label=document.createElement('div');label.className='tour-callout';label.dataset.tour=String(i);const n=document.createElement('b');n.textContent=String(tourOrder.indexOf(part)+1).padStart(2,'0');const copy=document.createElement('span');const title=document.createElement('strong');title.textContent=cleanName(part.name);const detail=document.createElement('small');detail.textContent=part.userData.description||part.userData.material||'Reconstructed component';copy.append(title,detail);label.append(n,copy);labels.append(label);const group=document.createElementNS('http://www.w3.org/2000/svg','g');group.dataset.tour=String(i);const line=document.createElementNS('http://www.w3.org/2000/svg','line'),dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r','4');group.append(line,dot);lines.append(group)});$('#tour-labels').replaceChildren(labels);$('#tour-lines').replaceChildren(lines);$('#tour-count').textContent=`${tourCursor+1}–${tourCursor+tourParts.length} / ${tourOrder.length}`;appearance();dirty=true}
+function clearTourLabels(){tourParts=[];tourLabels=[];tourGroups=[];$('#tour-labels').replaceChildren();$('#tour-lines').replaceChildren();appearance()}
+function buildTourGroup(){if(!tourOrder.length)return;tourParts=tourOrder.slice(tourCursor,tourCursor+3);const labels=document.createDocumentFragment(),lines=document.createDocumentFragment();tourParts.forEach((part,i)=>{const label=document.createElement('div');label.className='tour-callout';label.dataset.tour=String(i);const n=document.createElement('b');n.textContent=String(tourOrder.indexOf(part)+1).padStart(2,'0');const copy=document.createElement('span');const title=document.createElement('strong');title.textContent=cleanName(part.name);const detail=document.createElement('small');detail.textContent=part.userData.description||part.userData.material||'Reconstructed component';copy.append(title,detail);label.append(n,copy);labels.append(label);const group=document.createElementNS('http://www.w3.org/2000/svg','g');group.dataset.tour=String(i);const line=document.createElementNS('http://www.w3.org/2000/svg','line'),dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r','4');group.append(line,dot);lines.append(group)});$('#tour-labels').replaceChildren(labels);$('#tour-lines').replaceChildren(lines);
+ // Measured once per tour step. Reading offsetWidth/offsetHeight inside the
+ // frame loop forced a synchronous layout on every frame.
+ tourLabels=[...$('#tour-labels').children];for(const l of tourLabels){l.w=l.offsetWidth;l.h=l.offsetHeight}
+ tourGroups=[...$('#tour-lines').children].map(g=>({line:g.querySelector('line'),dot:g.querySelector('circle')}));
+ $('#tour-count').textContent=`${tourCursor+1}–${tourCursor+tourParts.length} / ${tourOrder.length}`;appearance();dirty=true}
 function startAutoTour(reset=true){if(!parts.length)return;selected=null;summary();listParts();$('#auto-tour').hidden=false;tourOrder=tourSequence();if(reset)tourCursor=0;tourLast=performance.now();buildTourGroup();$('#spin').textContent='Stop detail tour'}
 function stopAutoTour(){clearTourLabels();$('#auto-tour').hidden=true;$('#spin').textContent='Auto detail tour';dirty=true}
-function updateTourOverlay(){if(!controls.autoRotate||!tourParts.length)return;const area=$('#canvas').getBoundingClientRect(),overlay=$('#auto-tour').getBoundingClientRect(),w=area.width,h=area.height,box=new T.Box3(),point=new T.Vector3();$('#tour-lines').setAttribute('viewBox',`0 0 ${w} ${h}`);tourParts.forEach((part,i)=>{box.setFromObject(part).getCenter(point).project(camera);const ax=(point.x*.5+.5)*w,ay=(-point.y*.5+.5)*h,label=$(`.tour-callout[data-tour="${i}"]`);if(!label)return;const right=ax<w/2,labelX=right?w-label.offsetWidth-20:20,slots=[h*.30,h*.50,h*.70],labelY=Math.max(100,Math.min(h-label.offsetHeight-100,slots[i]));label.style.left=labelX+'px';label.style.top=labelY+'px';label.classList.toggle('right',right);const group=$(`#tour-lines [data-tour="${i}"]`),line=group.querySelector('line'),dot=group.querySelector('circle'),endX=right?labelX:labelX+label.offsetWidth,endY=labelY+label.offsetHeight/2;line.setAttribute('x1',ax);line.setAttribute('y1',ay);line.setAttribute('x2',endX);line.setAttribute('y2',endY);dot.setAttribute('cx',ax);dot.setAttribute('cy',ay)})}
+function updateTourOverlay(){
+ if(!controls.autoRotate||!tourParts.length)return;
+ const w=canvasW,h=canvasH;
+ // Cached part centre + cached canvas size: no getBoundingClientRect, no
+ // offsetWidth, and no Box3.setFromObject rebuild per label per frame.
+ tourParts.forEach((part,i)=>{
+  const label=tourLabels[i],refs=tourGroups[i];if(!label||!refs)return;
+  scratch.copy(part.userData.center).applyMatrix4(part.matrixWorld).project(camera);
+  const ax=(scratch.x*.5+.5)*w,ay=(-scratch.y*.5+.5)*h;
+  const right=ax<w/2,labelX=right?w-label.w-20:20,slots=[h*.30,h*.50,h*.70],labelY=Math.max(100,Math.min(h-label.h-100,slots[i]));
+  label.style.transform=`translate3d(${labelX}px,${labelY}px,0)`;label.classList.toggle('right',right);
+  const endX=right?labelX:labelX+label.w,endY=labelY+label.h/2;
+  refs.line.setAttribute('x1',ax);refs.line.setAttribute('y1',ay);refs.line.setAttribute('x2',endX);refs.line.setAttribute('y2',endY);refs.dot.setAttribute('cx',ax);refs.dot.setAttribute('cy',ay);
+ });
+}
 function chrome(){
  const system=current().slug==='connected-system';
  $('#title').textContent=current().name;$('#category').textContent=variant().label;$('#number').textContent=`PRODUCT ${String(index+1).padStart(2,'0')} / ${catalog.length}`;
@@ -91,7 +123,15 @@ async function load(i,v=0){
   const gltf=await loader.loadAsync('/models/'+variant().file);if(mine!==token){dispose(gltf.scene);return}
   model=new T.Group();model.name=current().name;model.userData={source:'IMG20260917'+variant().photo,variant:variant().label,accuracy:'Photo reconstruction; estimated unlabelled dimensions'};model.add(gltf.scene);model.updateMatrixWorld(true);
   const components=[];gltf.scene.traverse(o=>{if(o.userData.component)components.push(o)});const order=['enclosure','connection','protection','support','conductor','insulation'];components.sort((a,b)=>order.indexOf(a.userData.kind)-order.indexOf(b.userData.kind));
-  for(const p of components){const d=p.userData.delta||[0,0,0],a=p.userData.demoAttach;model.attach(p);p.userData.base=p.position.clone();p.userData.delta=new T.Vector3(d[0],d[2],-d[1]);if(a){p.userData.demoAttach=new T.Vector3(...a);demoParts.push(p)}p.traverse(o=>{if(o.isMesh)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone()});parts.push(p)}
+  for(const p of components){const d=p.userData.delta||[0,0,0],a=p.userData.demoAttach;model.attach(p);p.userData.base=p.position.clone();p.userData.delta=new T.Vector3(d[0],d[2],-d[1]);if(a){p.userData.demoAttach=new T.Vector3(...a);demoParts.push(p)}
+  // One clone per (part, source material) instead of one per mesh. Parts still
+  // fade independently, but the renderer stops switching material state on
+  // every one of the ~230 meshes in a model.
+  const clones=new Map(),materials=[];
+  p.traverse(o=>{if(!o.isMesh)return;const list=(Array.isArray(o.material)?o.material:[o.material]).map(m=>{let c=clones.get(m);if(!c){c=m.clone();clones.set(m,c);materials.push(c)}return c});o.material=list.length===1?list[0]:list});
+  p.userData.materials=materials;
+  p.updateMatrixWorld(true);p.userData.center=p.worldToLocal(new T.Box3().setFromObject(p).getCenter(new T.Vector3()));
+  parts.push(p)}
   gltf.scene.removeFromParent();if(current().slug==='connected-system')setupFlow();scene.add(model);setMaterial();chrome();fit(current().slug==='connected-system'?new T.Vector3(-1,.18,2):undefined);if(controls.autoRotate)startAutoTour();$('#loading').hidden=true;window.dispatchEvent(new CustomEvent('megaduct-loaded',{detail:{slug:current().slug,variant:variant().key}}));
  }catch(e){$('#loading').textContent='Unable to load this model: '+e.message;console.error(e)}
 }
@@ -112,7 +152,22 @@ $('#export').onclick=async()=>{
 };
 const ray=new T.Raycaster(),pointer=new T.Vector2();let down;
 renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);renderer.domElement.addEventListener('pointerup',e=>{if(!model||!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(parts,true).find(h=>{let p=h.object;while(p.parent&&p.parent!==model)p=p.parent;return !(ghost&&p.userData.kind==='enclosure')});if(hit){let p=hit.object;while(p.parent!==model)p=p.parent;select(p)}});
-function resize(){const r=$('#canvas').getBoundingClientRect();renderer.setSize(r.width,r.height);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();dirty=true;fit()}
-new ResizeObserver(resize).observe($('#canvas'));resize();await load(0);
+function resize(){const r=$('#canvas').getBoundingClientRect();if(!r.width||!r.height)return;canvasW=r.width;canvasH=r.height;renderer.setPixelRatio(pixelRatio(r.width,r.height));renderer.setSize(r.width,r.height);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();$('#tour-lines').setAttribute('viewBox',`0 0 ${r.width} ${r.height}`);dirty=true;fit()}
+// Coalesced to one resize per frame: a window drag otherwise refit the camera
+// and rebuilt the model bounding box on every observer callback.
+let resizeQueued=false;
+new ResizeObserver(()=>{if(resizeQueued)return;resizeQueued=true;requestAnimationFrame(()=>{resizeQueued=false;resize()})}).observe($('#canvas'));resize();await load(0);
 controls.addEventListener('change',()=>dirty=true);
-renderer.setAnimationLoop(time=>{let moving=Math.abs(target-amount)>.0005;if(!moving&&amount!==target){amount=target;dirty=true}const changed=controls.update();if(!dirty&&!moving&&!changed&&!controls.autoRotate&&!flowActive)return;if(moving)amount+=(target-amount)*.12;if(controls.autoRotate&&time-tourLast>TOUR_DETAIL_HOLD){tourCursor=(tourCursor+tourParts.length)%tourOrder.length;tourLast=time;buildTourGroup()}for(const p of parts)p.position.copy(p.userData.base).addScaledVector(p.userData.delta,amount*EXPLODE_SCALE);updateFlow(time);updateConnectionDemo();model?.updateMatrixWorld(true);updateTourOverlay();renderer.render(scene,camera);dirty=false});
+renderer.setAnimationLoop(time=>{let moving=Math.abs(target-amount)>.0005;if(!moving&&amount!==target){amount=target;dirty=true}const changed=controls.update();if(!dirty&&!moving&&!changed&&!controls.autoRotate&&!flowActive)return;if(moving)amount+=(target-amount)*.12;
+ if(controls.autoRotate&&time-tourLast>TOUR_DETAIL_HOLD){tourCursor=(tourCursor+tourParts.length)%tourOrder.length;tourLast=time;buildTourGroup()}
+ // Rest positions do not change while the user is only orbiting, so rewrite
+ // them while the explosion eases, and otherwise only the demo parts that
+ // updateConnectionDemo offsets from their base each frame.
+ const demo=demoParts.length&&amount<=.01;
+ if(moving||dirty)for(const p of parts)p.position.copy(p.userData.base).addScaledVector(p.userData.delta,amount*EXPLODE_SCALE);
+ else if(demo)for(const p of demoParts)p.position.copy(p.userData.base).addScaledVector(p.userData.delta,amount*EXPLODE_SCALE);
+ updateFlow(time);updateConnectionDemo();
+ // The renderer updates the scene graph itself; only the overlay needs world
+ // matrices early, and an unforced update skips the untouched branches.
+ if(tourParts.length)model?.updateMatrixWorld();
+ updateTourOverlay();renderer.render(scene,camera);dirty=false});
