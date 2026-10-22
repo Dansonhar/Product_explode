@@ -3,7 +3,8 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 
-const catalog = await fetch('/models/catalog.json').then(r=>{if(!r.ok)throw Error('Catalogue unavailable');return r.json()});
+const BASE = import.meta.env.BASE_URL;
+const catalog = await fetch(BASE+'models/catalog.json').then(r=>{if(!r.ok)throw Error('Catalogue unavailable');return r.json()});
 const $=s=>document.querySelector(s);
 $('#app').innerHTML=`
 <header><div class="brand">CRAVE <b>ProductViu<sup>™</sup></b><span> / LINKK</span></div><div class="tag">MEGADUCT · PHOTO RECONSTRUCTION · SEPTEMBER 2026</div><button id="theme">Light / dark</button></header>
@@ -33,7 +34,7 @@ const FLOW_DETAIL_HOLD=6500,TOUR_DETAIL_HOLD=9000;
 const current=()=>catalog[index],variant=()=>current().variants[variantIndex];
 const cleanName=name=>name.replaceAll('_',' ').replace(/\.?\d{3}$/,'');
 function listCatalog(){
- const query=$('#search').value.toLowerCase();$('#catalog').innerHTML=catalog.map((p,i)=>p.name.toLowerCase().includes(query)?`<button class="product ${index===i?'selected':''}" data-product="${i}"><img src="/thumbs/${p.slug}.webp" loading="lazy" decoding="async" alt="" onerror="this.style.visibility='hidden'"><span><small>${String(i+1).padStart(2,'0')}</small>${p.name}</span><em>↗</em></button>`:'').join('');
+ const query=$('#search').value.toLowerCase();$('#catalog').innerHTML=catalog.map((p,i)=>p.name.toLowerCase().includes(query)?`<button class="product ${index===i?'selected':''}" data-product="${i}"><img src="${BASE}thumbs/${p.slug}.webp" loading="lazy" decoding="async" alt="" onerror="this.style.visibility='hidden'"><span><small>${String(i+1).padStart(2,'0')}</small>${p.name}</span><em>↗</em></button>`:'').join('');
 }
 $('#catalog').onclick=e=>{const b=e.target.closest('[data-product]');if(b)load(+b.dataset.product)};
 $('#parts').onclick=e=>{const b=e.target.closest('[data-part]');if(b)select(parts[+b.dataset.part])};
@@ -112,7 +113,7 @@ function chrome(){
  $('#badges').innerHTML=system?'<b>ANIMATED APPLICATION</b><b>CONNECTED PRODUCTS</b>':'<b>RECONSTRUCTED ASSEMBLY</b><b>EDITABLE BLENDER SOURCE</b>';
  $('#hint').textContent=system?'Follow the cyan energy path · Drag to orbit · Scroll to zoom':'Drag to orbit · Scroll to zoom · Select a component';
  $('#variant').innerHTML=current().variants.map((v,i)=>`<option value="${i}" ${i===variantIndex?'selected':''}>${v.label}</option>`).join('');$('#variant').disabled=current().variants.length===1;
- const ref='/references/web/'+variant().photo.replace(/\.jpg$/i,'.webp');$('#ref').src=ref;$('#reference-large').src=ref;$('#source-name').textContent='IMG20260917'+variant().photo;
+ const ref=BASE+'references/web/'+variant().photo.replace(/\.jpg$/i,'.webp');$('#ref').src=ref;$('#reference-large').src=ref;$('#source-name').textContent='IMG20260917'+variant().photo;
  $('#facts').innerHTML='<div class="facts-title">REFERENCE DETAILS</div>'+current().facts.map(f=>`<div class="fact">${f}</div>`).join('');summary();listParts();listCatalog();
 }
 async function load(i,v=0){
@@ -120,7 +121,7 @@ async function load(i,v=0){
  clearTourLabels();$('#auto-tour').hidden=true;clearFlow();
  if(model){scene.remove(model);dispose(model)}model=null;parts=[];demoParts=[];chrome();$('#loading').hidden=false;$('#loading').textContent='Loading reconstruction…';
  try{
-  const gltf=await loader.loadAsync('/models/'+variant().file);if(mine!==token){dispose(gltf.scene);return}
+  const gltf=await loader.loadAsync(BASE+'models/'+variant().file);if(mine!==token){dispose(gltf.scene);return}
   model=new T.Group();model.name=current().name;model.userData={source:'IMG20260917'+variant().photo,variant:variant().label,accuracy:'Photo reconstruction; estimated unlabelled dimensions'};model.add(gltf.scene);model.updateMatrixWorld(true);
   const components=[];gltf.scene.traverse(o=>{if(o.userData.component)components.push(o)});const order=['enclosure','connection','protection','support','conductor','insulation'];components.sort((a,b)=>order.indexOf(a.userData.kind)-order.indexOf(b.userData.kind));
   for(const p of components){const d=p.userData.delta||[0,0,0],a=p.userData.demoAttach;model.attach(p);p.userData.base=p.position.clone();p.userData.delta=new T.Vector3(d[0],d[2],-d[1]);if(a){p.userData.demoAttach=new T.Vector3(...a);demoParts.push(p)}
